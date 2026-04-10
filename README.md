@@ -1,4 +1,4 @@
-# AI Automatic Release Notes (GitHub Action)
+# Copilot Release Notes Action
 
 Generate and publish AI-powered GitHub release titles and release notes using GitHub Copilot.
 
@@ -55,7 +55,7 @@ jobs:
           fetch-depth: 0
 
       - name: Generate and update release notes
-        uses: nooblk-98/ai-automatic-releases@v1
+        uses: nooblk-98/copilot-release-notes-action@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           copilot_model: gpt-4o
@@ -90,7 +90,7 @@ jobs:
           fetch-depth: 0
 
       - name: Generate and update release notes
-        uses: nooblk-98/ai-automatic-releases@v1
+        uses: nooblk-98/copilot-release-notes-action@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: ${{ inputs.tag_name }}
