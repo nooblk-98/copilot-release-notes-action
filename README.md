@@ -4,28 +4,6 @@ Generate and publish AI-powered GitHub release titles and release notes using Gi
 
 This repository is structured as a reusable GitHub Action for the GitHub Marketplace.
 
-## Repository Structure
-
-- `action.yml`: Marketplace action definition.
-- `scripts/release/01_prepare_context.py`: Resolves current and previous tags.
-- `scripts/release/02_build_change_summary.py`: Builds commit summary for release range.
-- `scripts/release/03_generate_release_notes.py`: Generates release notes (Copilot + fallback).
-- `scripts/release/04_generate_release_title.py`: Generates release title (Copilot + fallback).
-- `scripts/release/05_update_release.py`: Updates GitHub release title and body.
-- `.github/workflows/auto-release-notes.yml`: Example workflow using this action.
-
-## Inputs
-
-- `github_token` (required): GitHub token with `contents: write` permission.
-- `copilot_model` (optional): Copilot model name. Default: `gpt-4o`.
-- `tag_name` (optional): Release tag to update. If omitted, latest tag is used.
-- `target_commitish` (optional): Target commit SHA/branch.
-
-## Outputs
-
-- `release_title`: Final release title used.
-- `release_notes`: Final release notes markdown used.
-
 ## Auth Notes
 
 - The action uses your repository/workflow `GITHUB_TOKEN`; no extra external token is required.
