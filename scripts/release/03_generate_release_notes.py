@@ -91,8 +91,6 @@ github_body = generated.get('body', '').strip()
 clean_github_body = remove_full_changelog_lines(github_body)
 
 changes = categorize_changes(summary_body)
-compare_link = f'https://github.com/{repo}/compare/{previous_tag}...{new_tag}' if previous_tag else ''
-
 default_notes = (
     f'## Release {new_tag}\n\n'
     f'### Summary\n'
@@ -103,9 +101,7 @@ default_notes = (
     f'{section("Updates", changes["updates"])}\n'
     f'{section("Other Changes", changes["other_changes"])}\n'
     f'### GitHub Generated Notes\n'
-    f'{clean_github_body or "- No GitHub generated notes."}\n\n'
-    f'### References\n'
-    f'{("- Compare: " + compare_link) if compare_link else "- Compare link unavailable for initial release range."}\n'
+    f'{clean_github_body or "- No GitHub generated notes."}\n'
 )
 
 copilot_token = gh_token
@@ -123,13 +119,12 @@ request_body = {
         {
             'role': 'user',
             'content': (
-                'Create release notes in markdown with sections: Summary, New Features, Bug Fixes, Updates, Other Changes, and References. '
+                'Create release notes in markdown with sections: Summary, New Features, Bug Fixes, Updates, and Other Changes. '
                 f'Tag: {new_tag}. Previous tag: {previous_tag or "none"}\n\n'
                 f'Commit summary:\n{summary_body}\n\n'
                 f'GitHub generated notes:\n{clean_github_body}\n\n'
-                f'Compare link: {compare_link or "unavailable"}\n\n'
                 'Do not duplicate a "Full Changelog" heading and do not repeat the same changelog line twice. '
-                'Do not include empty category sections.'
+                'Do not include empty category sections. Do not include a References section.'
             ),
         },
     ],
