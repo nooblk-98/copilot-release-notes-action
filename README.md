@@ -28,8 +28,8 @@ This repository is structured as a reusable GitHub Action for the GitHub Marketp
 
 ## Auth Notes
 
-- The action logs into Copilot in workflow runtime using `actions/setup-copilot@v0`.
-- It uses your repository/workflow `GITHUB_TOKEN`; no extra external token is required.
+- The action uses your repository/workflow `GITHUB_TOKEN`; no extra external token is required.
+- It calls the Copilot API directly and does not require `actions/setup-copilot`.
 - No OpenAI API key is required.
 
 If Copilot generation is unavailable, the action falls back to GitHub generated notes plus commit summary.

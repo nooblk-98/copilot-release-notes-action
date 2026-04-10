@@ -31,16 +31,6 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Set up Copilot CLI
-      uses: actions/setup-copilot@v0
-      with:
-        version: latest
-        github-token: ${{ inputs.github_token }}
-
-    - name: Verify Copilot CLI installation
-      shell: bash
-      run: copilot --version
-
     - name: Ensure required tools are available
       shell: bash
       run: |
