@@ -75,13 +75,6 @@ jobs:
           target_commitish: ${{ inputs.target_commitish }}
 ```
 
-## Publishing to GitHub Marketplace
-
-1. Keep `action.yml` in repository root.
-2. Create release `v1.0.0`.
-3. Create/move major tag `v1` to that release commit.
-4. Publish Marketplace listing from this repository.
-
 ## Runner Requirements
 
 - `python3` and `git` (available on `ubuntu-latest`).
