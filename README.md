@@ -12,6 +12,28 @@ This repository is structured as a reusable GitHub Action for the GitHub Marketp
 
 If Copilot generation is unavailable, the action falls back to GitHub generated notes plus commit summary.
 
+## Sample Output
+
+```md
+### Summary
+- Tag: `v1.4.0`
+- Previous tag: `v1.3.0`
+
+### New Features
+- feat: add automatic category grouping for commits (a1b2c3d)
+- feat: support manual workflow_dispatch release updates (d4e5f6g)
+
+### Bug Fixes
+- fix: remove duplicate changelog lines in release body (h7i8j9k)
+
+### Updates
+- chore: improve README examples and simplify setup (l0m1n2o)
+
+### GitHub Generated Notes
+* Merged PR #12 from `feature/release-note-cleanup`
+* Merged PR #13 from `fix/remove-duplicate-heading`
+```
+
 ## Sample Usage (Release Event)
 
 ```yaml
