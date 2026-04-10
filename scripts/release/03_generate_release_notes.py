@@ -63,6 +63,22 @@ def remove_full_changelog_lines(text: str) -> str:
     return '\n'.join(kept).strip()
 
 
+def remove_duplicate_release_heading(text: str, tag: str) -> str:
+    lines = text.splitlines()
+    if not lines:
+        return text.strip()
+
+    first = lines[0].strip().lower()
+    expected = f'release {tag}'.lower()
+    if first.startswith('#'):
+        heading_text = first.lstrip('#').strip()
+        if heading_text == expected:
+            lines = lines[1:]
+            while lines and not lines[0].strip():
+                lines = lines[1:]
+    return '\n'.join(lines).strip()
+
+
 def gh_api(method: str, endpoint: str, payload: dict) -> dict:
     url = f'https://api.github.com{endpoint}'
     req = urllib.request.Request(
@@ -92,7 +108,6 @@ clean_github_body = remove_full_changelog_lines(github_body)
 
 changes = categorize_changes(summary_body)
 default_notes = (
-    f'## Release {new_tag}\n\n'
     f'### Summary\n'
     f'- Tag: `{new_tag}`\n'
     f'- Previous tag: `{previous_tag or "none"}`\n\n'
@@ -150,5 +165,6 @@ except (urllib.error.URLError, urllib.error.HTTPError, KeyError, IndexError, jso
     ai_notes = ''
 
 final_notes = remove_full_changelog_lines(ai_notes or default_notes)
+final_notes = remove_duplicate_release_heading(final_notes, new_tag)
 NOTES_PATH.write_text(final_notes.rstrip() + '\n', encoding='utf-8')
 print(f'Wrote release notes to {NOTES_PATH}')
