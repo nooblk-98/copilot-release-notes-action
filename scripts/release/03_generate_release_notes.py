@@ -47,11 +47,10 @@ def categorize_changes(summary: str) -> dict:
     return categories
 
 
-def section(title: str, items: list[str], empty_label: str) -> str:
+def section(title: str, items: list[str]) -> str:
     if not items:
-        body = f'- {empty_label}'
-    else:
-        body = '\n'.join(items)
+        return ''
+    body = '\n'.join(items)
     return f'### {title}\n{body}\n'
 
 
@@ -95,10 +94,10 @@ default_notes = (
     f'### Summary\n'
     f'- Tag: `{new_tag}`\n'
     f'- Previous tag: `{previous_tag or "none"}`\n\n'
-    f'{section("New Features", changes["new_features"], "No new feature commits detected.")}\n'
-    f'{section("Bug Fixes", changes["bug_fixes"], "No bug fix commits detected.")}\n'
-    f'{section("Updates", changes["updates"], "No update commits detected.")}\n'
-    f'{section("Other Changes", changes["other_changes"], "No additional commits detected.")}\n'
+    f'{section("New Features", changes["new_features"])}\n'
+    f'{section("Bug Fixes", changes["bug_fixes"])}\n'
+    f'{section("Updates", changes["updates"])}\n'
+    f'{section("Other Changes", changes["other_changes"])}\n'
     f'### GitHub Generated Notes\n'
     f'{clean_github_body or "- No GitHub generated notes."}\n\n'
     f'### References\n'
@@ -125,7 +124,8 @@ request_body = {
                 f'Commit summary:\n{summary_body}\n\n'
                 f'GitHub generated notes:\n{clean_github_body}\n\n'
                 f'Compare link: {compare_link or "unavailable"}\n\n'
-                'Do not duplicate a "Full Changelog" heading and do not repeat the same changelog line twice.'
+                'Do not duplicate a "Full Changelog" heading and do not repeat the same changelog line twice. '
+                'Do not include empty category sections.'
             ),
         },
     ],
