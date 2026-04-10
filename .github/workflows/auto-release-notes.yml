@@ -31,7 +31,7 @@ jobs:
         uses: ./
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          openai_api_key: ${{ secrets.OPENAI_API_KEY }}
-          openai_model: ${{ vars.OPENAI_MODEL || 'gpt-4.1-mini' }}
+          copilot_token: ${{ secrets.COPILOT_TOKEN }}
+          copilot_model: gpt-4o
           tag_name: ${{ github.event.release.tag_name || inputs.tag_name }}
           target_commitish: ${{ github.event.release.target_commitish || inputs.target_commitish }}

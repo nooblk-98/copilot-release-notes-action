@@ -1,5 +1,5 @@
 name: AI Automatic Release Notes
-description: Generate and publish AI-powered GitHub release titles and notes.
+description: Generate and publish AI-powered GitHub release titles and notes using GitHub Copilot.
 author: lahiru
 branding:
   icon: file-text
@@ -9,13 +9,13 @@ inputs:
   github_token:
     description: GitHub token with contents:write permission.
     required: true
-  openai_api_key:
-    description: OpenAI API key for AI title/notes generation.
+  copilot_token:
+    description: Optional token for Copilot chat completions. If omitted, github_token is used.
     required: false
-  openai_model:
-    description: OpenAI model for generation.
+  copilot_model:
+    description: Copilot model for generation.
     required: false
-    default: gpt-4.1-mini
+    default: gpt-4o
   tag_name:
     description: Release tag to update. If empty, latest tag is used.
     required: false
@@ -38,7 +38,7 @@ runs:
       shell: bash
       run: |
         set -euo pipefail
-        for cmd in gh jq curl git; do
+        for cmd in python3 git; do
           if ! command -v "$cmd" >/dev/null 2>&1; then
             echo "Missing required command: $cmd"
             exit 1
@@ -51,35 +51,35 @@ runs:
         GH_TOKEN: ${{ inputs.github_token }}
         RELEASE_TAG: ${{ inputs.tag_name }}
         RELEASE_TARGET: ${{ inputs.target_commitish }}
-      run: bash "${GITHUB_ACTION_PATH}/scripts/release/01_prepare_context.sh"
+      run: python3 "${GITHUB_ACTION_PATH}/scripts/release/01_prepare_context.py"
 
     - name: Build change summary
       shell: bash
       env:
         GH_TOKEN: ${{ inputs.github_token }}
-      run: bash "${GITHUB_ACTION_PATH}/scripts/release/02_build_change_summary.sh"
+      run: python3 "${GITHUB_ACTION_PATH}/scripts/release/02_build_change_summary.py"
 
     - name: Generate release notes
       shell: bash
       env:
         GH_TOKEN: ${{ inputs.github_token }}
-        OPENAI_API_KEY: ${{ inputs.openai_api_key }}
-        OPENAI_MODEL: ${{ inputs.openai_model }}
-      run: bash "${GITHUB_ACTION_PATH}/scripts/release/03_generate_release_notes.sh"
+        COPILOT_TOKEN: ${{ inputs.copilot_token }}
+        COPILOT_MODEL: ${{ inputs.copilot_model }}
+      run: python3 "${GITHUB_ACTION_PATH}/scripts/release/03_generate_release_notes.py"
 
     - name: Generate release title
       shell: bash
       env:
         GH_TOKEN: ${{ inputs.github_token }}
-        OPENAI_API_KEY: ${{ inputs.openai_api_key }}
-        OPENAI_MODEL: ${{ inputs.openai_model }}
-      run: bash "${GITHUB_ACTION_PATH}/scripts/release/04_generate_release_title.sh"
+        COPILOT_TOKEN: ${{ inputs.copilot_token }}
+        COPILOT_MODEL: ${{ inputs.copilot_model }}
+      run: python3 "${GITHUB_ACTION_PATH}/scripts/release/04_generate_release_title.py"
 
     - name: Update release
       shell: bash
       env:
         GH_TOKEN: ${{ inputs.github_token }}
-      run: bash "${GITHUB_ACTION_PATH}/scripts/release/05_update_release.sh"
+      run: python3 "${GITHUB_ACTION_PATH}/scripts/release/05_update_release.py"
 
     - name: Export outputs
       id: export
