@@ -1,0 +1,102 @@
+name: AI Automatic Release Notes
+description: Generate and publish AI-powered GitHub release titles and notes.
+author: lahiru
+branding:
+  icon: file-text
+  color: blue
+
+inputs:
+  github_token:
+    description: GitHub token with contents:write permission.
+    required: true
+  openai_api_key:
+    description: OpenAI API key for AI title/notes generation.
+    required: false
+  openai_model:
+    description: OpenAI model for generation.
+    required: false
+    default: gpt-4.1-mini
+  tag_name:
+    description: Release tag to update. If empty, latest tag is used.
+    required: false
+  target_commitish:
+    description: Target commit SHA or branch for the release.
+    required: false
+
+outputs:
+  release_title:
+    description: Generated or fallback release title.
+    value: ${{ steps.export.outputs.release_title }}
+  release_notes:
+    description: Generated or fallback release notes markdown.
+    value: ${{ steps.export.outputs.release_notes }}
+
+runs:
+  using: composite
+  steps:
+    - name: Ensure required tools are available
+      shell: bash
+      run: |
+        set -euo pipefail
+        for cmd in gh jq curl git; do
+          if ! command -v "$cmd" >/dev/null 2>&1; then
+            echo "Missing required command: $cmd"
+            exit 1
+          fi
+        done
+
+    - name: Prepare release context
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github_token }}
+        RELEASE_TAG: ${{ inputs.tag_name }}
+        RELEASE_TARGET: ${{ inputs.target_commitish }}
+      run: bash "${GITHUB_ACTION_PATH}/scripts/release/01_prepare_context.sh"
+
+    - name: Build change summary
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github_token }}
+      run: bash "${GITHUB_ACTION_PATH}/scripts/release/02_build_change_summary.sh"
+
+    - name: Generate release notes
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github_token }}
+        OPENAI_API_KEY: ${{ inputs.openai_api_key }}
+        OPENAI_MODEL: ${{ inputs.openai_model }}
+      run: bash "${GITHUB_ACTION_PATH}/scripts/release/03_generate_release_notes.sh"
+
+    - name: Generate release title
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github_token }}
+        OPENAI_API_KEY: ${{ inputs.openai_api_key }}
+        OPENAI_MODEL: ${{ inputs.openai_model }}
+      run: bash "${GITHUB_ACTION_PATH}/scripts/release/04_generate_release_title.sh"
+
+    - name: Update release
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github_token }}
+      run: bash "${GITHUB_ACTION_PATH}/scripts/release/05_update_release.sh"
+
+    - name: Export outputs
+      id: export
+      shell: bash
+      run: |
+        set -euo pipefail
+        title_file="/tmp/release-title.txt"
+        notes_file="/tmp/release-notes.md"
+
+        if [[ ! -f "$title_file" || ! -f "$notes_file" ]]; then
+          echo "Expected output files not found."
+          exit 1
+        fi
+
+        {
+          echo "release_title=$(cat "$title_file")"
+          echo "release_notes<<EOF"
+          cat "$notes_file"
+          echo "EOF"
+        } >> "$GITHUB_OUTPUT"

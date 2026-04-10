@@ -1,4 +1,4 @@
-name: AI Auto Release Notes
+name: Example - AI Auto Release Notes
 
 on:
   release:
@@ -19,33 +19,19 @@ permissions:
   contents: write
 
 jobs:
-  generate-release-notes:
+  update-release:
     runs-on: ubuntu-latest
-    env:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-      OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-4.1-mini' }}
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
-      - name: Prepare release context
-        env:
-          RELEASE_TAG: ${{ github.event.release.tag_name || inputs.tag_name }}
-          RELEASE_TARGET: ${{ github.event.release.target_commitish || inputs.target_commitish }}
-        run: bash .github/scripts/release/01_prepare_context.sh
-
-      - name: Build change summary
-        run: bash .github/scripts/release/02_build_change_summary.sh
-
-      - name: Generate release notes
-        run: bash .github/scripts/release/03_generate_release_notes.sh
-
-      - name: Generate release title
-        run: bash .github/scripts/release/04_generate_release_title.sh
-
-      - name: Update release
-        run: bash .github/scripts/release/05_update_release.sh
+      - name: Run marketplace action (local example)
+        uses: ./
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          openai_api_key: ${{ secrets.OPENAI_API_KEY }}
+          openai_model: ${{ vars.OPENAI_MODEL || 'gpt-4.1-mini' }}
+          tag_name: ${{ github.event.release.tag_name || inputs.tag_name }}
+          target_commitish: ${{ github.event.release.target_commitish || inputs.target_commitish }}
