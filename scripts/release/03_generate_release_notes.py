@@ -56,7 +56,7 @@ default_notes = (
     f'### Full Changelog\n{github_body}\n'
 )
 
-copilot_token = os.environ.get('COPILOT_TOKEN', '').strip() or gh_token
+copilot_token = gh_token
 copilot_model = os.environ.get('COPILOT_MODEL', 'gpt-4o').strip() or 'gpt-4o'
 ai_notes = ''
 

@@ -20,7 +20,7 @@ gh_token = os.environ.get('GH_TOKEN', '').strip()
 if not gh_token:
     raise SystemExit('GH_TOKEN is required.')
 
-copilot_token = os.environ.get('COPILOT_TOKEN', '').strip() or gh_token
+copilot_token = gh_token
 copilot_model = os.environ.get('COPILOT_MODEL', 'gpt-4o').strip() or 'gpt-4o'
 
 release_title = f'Release {new_tag}'

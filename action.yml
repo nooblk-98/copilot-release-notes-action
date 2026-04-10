@@ -9,9 +9,6 @@ inputs:
   github_token:
     description: GitHub token with contents:write permission.
     required: true
-  copilot_token:
-    description: Optional token for Copilot chat completions. If omitted, github_token is used.
-    required: false
   copilot_model:
     description: Copilot model for generation.
     required: false
@@ -34,6 +31,16 @@ outputs:
 runs:
   using: composite
   steps:
+    - name: Set up Copilot CLI
+      uses: actions/setup-copilot@v0
+      with:
+        version: latest
+        github-token: ${{ inputs.github_token }}
+
+    - name: Verify Copilot CLI installation
+      shell: bash
+      run: copilot --version
+
     - name: Ensure required tools are available
       shell: bash
       run: |
@@ -63,7 +70,6 @@ runs:
       shell: bash
       env:
         GH_TOKEN: ${{ inputs.github_token }}
-        COPILOT_TOKEN: ${{ inputs.copilot_token }}
         COPILOT_MODEL: ${{ inputs.copilot_model }}
       run: python3 "${GITHUB_ACTION_PATH}/scripts/release/03_generate_release_notes.py"
 
@@ -71,7 +77,6 @@ runs:
       shell: bash
       env:
         GH_TOKEN: ${{ inputs.github_token }}
-        COPILOT_TOKEN: ${{ inputs.copilot_token }}
         COPILOT_MODEL: ${{ inputs.copilot_model }}
       run: python3 "${GITHUB_ACTION_PATH}/scripts/release/04_generate_release_title.py"
 

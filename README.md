@@ -17,8 +17,6 @@ This repository is structured as a reusable GitHub Action for the GitHub Marketp
 ## Inputs
 
 - `github_token` (required): GitHub token with `contents: write` permission.
-- `copilot_token` (optional): Copilot token used for AI generation.
-  - If omitted, `github_token` is used.
 - `copilot_model` (optional): Copilot model name. Default: `gpt-4o`.
 - `tag_name` (optional): Release tag to update. If omitted, latest tag is used.
 - `target_commitish` (optional): Target commit SHA/branch.
@@ -30,9 +28,9 @@ This repository is structured as a reusable GitHub Action for the GitHub Marketp
 
 ## Auth Notes
 
-- You can run this with the current GitHub user's token flow.
+- The action logs into Copilot in workflow runtime using `actions/setup-copilot@v0`.
+- It uses your repository/workflow `GITHUB_TOKEN`; no extra external token is required.
 - No OpenAI API key is required.
-- For best Copilot reliability in Actions, provide `copilot_token` as a repo secret (example: `COPILOT_TOKEN`).
 
 If Copilot generation is unavailable, the action falls back to GitHub generated notes plus commit summary.
 
@@ -60,7 +58,6 @@ jobs:
         uses: nooblk-98/ai-automatic-releases@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          copilot_token: ${{ secrets.COPILOT_TOKEN }}
           copilot_model: gpt-4o
           tag_name: ${{ github.event.release.tag_name }}
           target_commitish: ${{ github.event.release.target_commitish }}
@@ -96,7 +93,6 @@ jobs:
         uses: nooblk-98/ai-automatic-releases@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          copilot_token: ${{ secrets.COPILOT_TOKEN }}
           tag_name: ${{ inputs.tag_name }}
           target_commitish: ${{ inputs.target_commitish }}
 ```
