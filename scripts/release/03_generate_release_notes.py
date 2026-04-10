@@ -54,6 +54,15 @@ def section(title: str, items: list[str]) -> str:
     return f'### {title}\n{body}\n'
 
 
+def remove_full_changelog_lines(text: str) -> str:
+    kept = []
+    for raw in text.splitlines():
+        if raw.strip().lower().startswith('full changelog:'):
+            continue
+        kept.append(raw)
+    return '\n'.join(kept).strip()
+
+
 def gh_api(method: str, endpoint: str, payload: dict) -> dict:
     url = f'https://api.github.com{endpoint}'
     req = urllib.request.Request(
@@ -79,12 +88,7 @@ if previous_tag:
 
 generated = gh_api('POST', f'/repos/{repo}/releases/generate-notes', payload)
 github_body = generated.get('body', '').strip()
-clean_github_body_lines = []
-for line in github_body.splitlines():
-    if line.strip().lower().startswith('full changelog:'):
-        continue
-    clean_github_body_lines.append(line)
-clean_github_body = '\n'.join(clean_github_body_lines).strip()
+clean_github_body = remove_full_changelog_lines(github_body)
 
 changes = categorize_changes(summary_body)
 compare_link = f'https://github.com/{repo}/compare/{previous_tag}...{new_tag}' if previous_tag else ''
@@ -150,5 +154,6 @@ try:
 except (urllib.error.URLError, urllib.error.HTTPError, KeyError, IndexError, json.JSONDecodeError):
     ai_notes = ''
 
-NOTES_PATH.write_text((ai_notes or default_notes).rstrip() + '\n', encoding='utf-8')
+final_notes = remove_full_changelog_lines(ai_notes or default_notes)
+NOTES_PATH.write_text(final_notes.rstrip() + '\n', encoding='utf-8')
 print(f'Wrote release notes to {NOTES_PATH}')
