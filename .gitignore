@@ -9,6 +9,8 @@ venv/
 env/
 ENV/
 
+.claude
+
 # Build/test artifacts
 .pytest_cache/
 .mypy_cache/
