@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 import json
 import os
+import tempfile
 import urllib.error
 import urllib.request
 from pathlib import Path
 
-CONTEXT_PATH = Path('/tmp/release-context.json')
-SUMMARY_PATH = Path('/tmp/change-summary.md')
-NOTES_PATH = Path('/tmp/release-notes.md')
+CONTEXT_PATH = Path(tempfile.gettempdir()) / 'release-context.json'
+SUMMARY_PATH = Path(tempfile.gettempdir()) / 'change-summary.md'
+NOTES_PATH = Path(tempfile.gettempdir()) / 'release-notes.md'
+API_TIMEOUT = 30
 
 if not CONTEXT_PATH.exists() or not SUMMARY_PATH.exists():
     raise SystemExit('Missing required context files.')
@@ -91,8 +93,13 @@ def gh_api(method: str, endpoint: str, payload: dict) -> dict:
             'Content-Type': 'application/json',
         },
     )
-    with urllib.request.urlopen(req) as resp:
-        return json.loads(resp.read().decode('utf-8'))
+    try:
+        with urllib.request.urlopen(req, timeout=API_TIMEOUT) as resp:
+            return json.loads(resp.read().decode('utf-8'))
+    except urllib.error.HTTPError as e:
+        raise SystemExit(f'GitHub API error {e.code} on {method} {endpoint}: {e.reason}')
+    except urllib.error.URLError as e:
+        raise SystemExit(f'GitHub API request failed for {endpoint}: {e.reason}')
 
 
 payload = {
@@ -119,7 +126,6 @@ default_notes = (
     f'{clean_github_body or "- No GitHub generated notes."}\n'
 )
 
-copilot_token = gh_token
 copilot_model = os.environ.get('COPILOT_MODEL', 'gpt-4o').strip() or 'gpt-4o'
 ai_notes = ''
 
@@ -151,18 +157,22 @@ try:
         method='POST',
         data=json.dumps(request_body).encode('utf-8'),
         headers={
-            'Authorization': f'Bearer {copilot_token}',
+            'Authorization': f'Bearer {gh_token}',
             'Content-Type': 'application/json',
             'Copilot-Integration-Id': 'github-actions',
             'Editor-Version': 'github-actions/1.0.0',
             'Editor-Plugin-Version': 'copilot-chat/1.0.0',
         },
     )
-    with urllib.request.urlopen(req) as resp:
+    with urllib.request.urlopen(req, timeout=API_TIMEOUT) as resp:
         data = json.loads(resp.read().decode('utf-8'))
         ai_notes = (data.get('choices', [{}])[0].get('message', {}).get('content') or '').strip()
-except (urllib.error.URLError, urllib.error.HTTPError, KeyError, IndexError, json.JSONDecodeError):
-    ai_notes = ''
+except urllib.error.HTTPError as e:
+    print(f'Warning: Copilot API returned HTTP {e.code}: {e.reason} — falling back to default notes.')
+except urllib.error.URLError as e:
+    print(f'Warning: Copilot API unreachable: {e.reason} — falling back to default notes.')
+except (KeyError, IndexError, json.JSONDecodeError) as e:
+    print(f'Warning: Unexpected Copilot API response ({e}) — falling back to default notes.')
 
 final_notes = remove_full_changelog_lines(ai_notes or default_notes)
 final_notes = remove_duplicate_release_heading(final_notes, new_tag)
