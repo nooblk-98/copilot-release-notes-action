@@ -50,12 +50,12 @@ jobs:
   release-notes:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Generate and update release notes
-        uses: nooblk-98/copilot-release-notes-action@v1
+        uses: nooblk-98/copilot-release-notes-action@main
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           copilot_model: gpt-4o
@@ -85,12 +85,12 @@ jobs:
   release-notes:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Generate and update release notes
-        uses: nooblk-98/copilot-release-notes-action@v1
+        uses: nooblk-98/copilot-release-notes-action@main
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: ${{ inputs.tag_name }}
